@@ -3,10 +3,11 @@ package remote_client;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
-import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Location extends JFrame implements ActionListener{
@@ -15,28 +16,28 @@ public class Location extends JFrame implements ActionListener{
 
 	private static Location instance;
 	
+	private JFileChooser chooser;
+	private File[] listOfFiles;
+	private String directory;
+
+	
 	private Location()
 	{
 		super("Choose archive location");
 		
+		checkPrevious();
+		
 		JPanel mainPanel = new JPanel();
-		JFileChooser chooser = new JFileChooser();
-		JButton okButton = new JButton("OK");
+		chooser = new JFileChooser();
+	    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	    chooser.setAcceptAllFileFilterUsed(false);
 		
 		add(mainPanel);
 		mainPanel.add(chooser, BorderLayout.SOUTH);
-		mainPanel.add(okButton, BorderLayout.NORTH);
 		pack();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-		okButton.addActionListener(this);
 		chooser.addActionListener(this);
-		
-	  /*  int returnVal = chooser.showOpenDialog(parent);
-	    if(returnVal == JFileChooser.APPROVE_OPTION) {
-	       System.out.println("You chose to open this file: " +
-	            chooser.getSelectedFile().getName());*/
-		
 	}
 	
 	public static Location getInstance()
@@ -46,12 +47,21 @@ public class Location extends JFrame implements ActionListener{
 		return instance;
 	}
 
-	@Override
 	public void actionPerformed(ActionEvent e)
-	{
+	{	
+		if(e.getActionCommand()=="CancelSelection")
+		{
+			Menu.getInstance().setVisible(true);
+		}
+		else if(e.getActionCommand()=="ApproveSelection")
+		{
+			directory = chooser.getSelectedFile().getPath();
+			setFileList();		
+			JOptionPane.showMessageDialog(null,"Archive location set to : " + directory);
+			
+		}	
 		setVisible(false);
 		Menu.getInstance().setVisible(true);
-		
 	}
 	
 	/*
@@ -60,7 +70,19 @@ public class Location extends JFrame implements ActionListener{
 	 */
 	public void checkPrevious()
 	{
+		System.out.println("to be implmented");
 		//TODO implement
+	}
+	
+	private void setFileList()
+	{
+		File folder = new File(directory);
+		listOfFiles = folder.listFiles();
+	}
+	
+	public File[] getFileList()
+	{
+		return listOfFiles;
 	}
 
 }

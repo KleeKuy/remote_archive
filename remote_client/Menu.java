@@ -17,6 +17,7 @@ public class Menu extends JFrame implements ActionListener{
 	private JTextField portTextField;
 	private JButton logButton;
 	private JButton setLocation;
+	private JButton exitButton;
 	
 	/**
 	 * Class describing main menu
@@ -36,11 +37,15 @@ public class Menu extends JFrame implements ActionListener{
 		ipTextField.setPreferredSize(buttonsize);
 		portTextField = new JTextField("Specify host port");
 		portTextField.setPreferredSize(buttonsize);
+		exitButton = new JButton("Exit");
+		exitButton.setPreferredSize(buttonsize);
 		
-		
+		JPanel secondPanel = new JPanel();
+		secondPanel.add(logButton,BorderLayout.NORTH);
+		secondPanel.add(exitButton,BorderLayout.SOUTH);
 		
 		add(mainPanel);
-		mainPanel.add(logButton, BorderLayout.SOUTH);
+		mainPanel.add(secondPanel, BorderLayout.SOUTH);
 		mainPanel.add(ipTextField,BorderLayout.EAST);
 		mainPanel.add(portTextField,BorderLayout.WEST);
 		mainPanel.add(setLocation,BorderLayout.NORTH);
@@ -50,6 +55,7 @@ public class Menu extends JFrame implements ActionListener{
 		
 		logButton.addActionListener(this);
 		setLocation.addActionListener(this);
+		exitButton.addActionListener(this);
 
 	}
 	
@@ -72,13 +78,14 @@ public class Menu extends JFrame implements ActionListener{
 			else
 				JOptionPane.showMessageDialog(null,"Please enter numeric port value");
 		}
-		else
+		else if(e.getSource()==setLocation)
 		{
 			setVisible(false);
 			Location location = Location.getInstance();
 			location.setVisible(true);
-
 		}
+		else
+			System.exit(1);
 		
 	}
 }
