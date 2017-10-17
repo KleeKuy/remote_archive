@@ -71,10 +71,11 @@ public class Menu extends JFrame implements ActionListener{
 
 		if(e.getSource()==logButton)
 		{
-			//TODO when we create new connection and previous still exists
-			// we must make sure that sockets in prevs are closed etc.
 			if(Common.isNumeric(portTextField.getText()))
-				JOptionPane.showMessageDialog(null,Connection.Connect(ipTextField.getText(),portTextField.getText()));
+				{
+				Connection connection = new Connection();
+				connection.connect(ipTextField.getText(), portTextField.getText());
+				}
 			else
 				JOptionPane.showMessageDialog(null,"Please enter numeric port value");
 		}

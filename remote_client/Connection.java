@@ -9,32 +9,37 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.*;
 
+import javax.swing.JOptionPane;
+
 public class Connection {
 
-	//TODO rethink this method,
-	//querry - is it proper? does this make sense?
-	//questionable imho, should be reorganized
-	//object of connection class should be initalized, no?
-	public static String Connect(final String hostName, String portname)
+	public Connection()
+	{
+		//TODO possibly read from config port and ip valuse
+		//hence in the future connection class will be storing
+		//port and ip as class variables?
+	}
+
+	public void connect(final String hostName, String portname)
 	{
 		final int port = Integer.parseInt(portname);
 		
 		try 
 		{
 			Socket clientSocket = new Socket(hostName, port);
-			
 			PrintWriter out =
 	                new PrintWriter(clientSocket.getOutputStream(), true);       
-			
 			BufferedReader inHost = new BufferedReader(
 	                new InputStreamReader(clientSocket.getInputStream()));
-			
 			OutputStream outs = clientSocket.getOutputStream();
-	      //  BufferedReader in = new BufferedReader(
-	      //          new InputStreamReader(clientSocket.getInputStream()));
+
+			//TODO this is subject to change, as of now functionality is that
+			//we connect to host, send stuff and disconnect, future versions
+			//will support keeping connection for some time to enable more
+			//actions
 	        out.println(Protocol.N_FILES);
 	        out.println(Location.getInstance().getFileList().length);
-	        //TODO maybe change this long thingy to loacl varaible here?
+	        
 	        for(int i=0; i<Location.getInstance().getFileList().length; i++)
 	        {
 	        	int count;
@@ -52,13 +57,6 @@ public class Connection {
 	            
 	            String response = inHost.readLine();
 	            System.out.println(response);
-	            //while(true)
-	          //  {
-	            	//TODO hmm, dis bad    	
-	            	//if(response=="file_received")
-	            	//	break;
-	       //     }
-	            System.out.println("closing");
 	            in.close();
 
 	        }
@@ -68,14 +66,13 @@ public class Connection {
 		}
 		catch(UnknownHostException e)
 		{
-			return "Don't know about host " + hostName;
+			JOptionPane.showMessageDialog(null,"Don't know about host " + hostName);
 		}
 		catch(IOException e)
 		{
-			return "Couldn't get I/O for the connection to " +
-					hostName;
+			JOptionPane.showMessageDialog(null,"Couldn't get I/O for the connection to " + hostName);
 		}
-		return "Connection Succesful";
+		JOptionPane.showMessageDialog(null,"Conection succesful");
 	}
 
 }
