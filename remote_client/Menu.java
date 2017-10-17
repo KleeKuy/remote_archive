@@ -71,8 +71,8 @@ public class Menu extends JFrame implements ActionListener{
 
 		if(e.getSource()==logButton)
 		{
-			//TODO rethink connection method. Should it really be string type?
-			//prolly not, but it should use its own window rather than dialog sooo...
+			//TODO when we create new connection and previous still exists
+			// we must make sure that sockets in prevs are closed etc.
 			if(Common.isNumeric(portTextField.getText()))
 				JOptionPane.showMessageDialog(null,Connection.Connect(ipTextField.getText(),portTextField.getText()));
 			else
