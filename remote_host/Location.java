@@ -85,4 +85,8 @@ public class Location extends JFrame implements ActionListener{
 		return listOfFiles;
 	}
 
+	public String getDirectory()
+	{
+		return directory;
+	}
 }
