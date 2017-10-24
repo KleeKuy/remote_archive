@@ -4,32 +4,32 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-public class Location extends JFrame implements ActionListener{
+public class FilePicker extends JFrame implements ActionListener{
 	
 	private static final long serialVersionUID = 1L;
 
-	private static Location instance;
+	private static FilePicker instance;
 	
 	private JFileChooser chooser;
-	private File[] listOfFiles;
-	private String directory;
-
+	private ArrayList<File> listOfFiles;
 	
-	private Location()
+	private FilePicker()
 	{
 		super("Choose archive location");
+		
+		listOfFiles = new ArrayList<File>();
 		
 		checkPrevious();
 		
 		JPanel mainPanel = new JPanel();
 		chooser = new JFileChooser();
-	    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 	    chooser.setAcceptAllFileFilterUsed(false);
 		
 		add(mainPanel);
@@ -40,10 +40,10 @@ public class Location extends JFrame implements ActionListener{
 		chooser.addActionListener(this);
 	}
 	
-	public static Location getInstance()
+	public static FilePicker getInstance()
 	{
 		if(instance==null)
-			instance = new Location();
+			instance = new FilePicker();
 		return instance;
 	}
 
@@ -51,36 +51,36 @@ public class Location extends JFrame implements ActionListener{
 	{	
 		if(e.getActionCommand()=="CancelSelection")
 		{
-			Menu.getInstance().setVisible(true);
+			Menu.getInstance().setFocus();
 		}
 		else if(e.getActionCommand()=="ApproveSelection")
 		{
-			directory = chooser.getSelectedFile().getPath();
-			setFileList();		
-			JOptionPane.showMessageDialog(null,"Archive location set to : " + directory);
+			String directory = chooser.getSelectedFile().getPath();
+			addFile(directory);		
+			JOptionPane.showMessageDialog(null,"New file - "+ directory +" added");
 			
 		}	
 		setVisible(false);
-		Menu.getInstance().setVisible(true);
+		Menu.getInstance().setFocus();
 	}
 	
 	/*
-	 * Checks in config files whether there is a location 
-	 * set previously
+	 * Checks in config files whether there are files 
+	 * set previously in config
 	 */
-	public void checkPrevious()
+	private void checkPrevious()
 	{
 		System.out.println("to be implmented");
 		//TODO implement
 	}
 	
-	private void setFileList()
+	private void addFile(String directory)
 	{
-		File folder = new File(directory);
-		listOfFiles = folder.listFiles();
+		File file = new File(directory);		
+		listOfFiles.add(file);
 	}
 	
-	public File[] getFileList()
+	public ArrayList<File> getFileList()
 	{
 		return listOfFiles;
 	}

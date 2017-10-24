@@ -11,6 +11,8 @@ import java.net.*;
 
 import javax.swing.JOptionPane;
 
+//TODO hmm, maybe we should make two threads here, one that is
+//sending stuff, and the other that is listening to what host says?
 public class Connection {
 
 	public Connection()
@@ -38,18 +40,18 @@ public class Connection {
 			//will support keeping connection for some time to enable more
 			//actions
 	        out.println(Protocol.N_FILES);
-	        out.println(Location.getInstance().getFileList().length);
+	        out.println(FilePicker.getInstance().getFileList().size());
 	        
-	        for(int i=0; i<Location.getInstance().getFileList().length; i++)
+	        for(int i=0; i<FilePicker.getInstance().getFileList().size(); i++)
 	        {
 	        	int count;
 	        	out.println(Protocol.SIZE);
-	        	out.println((int) Location.getInstance().getFileList()[i].length());
+	        	out.println((int) FilePicker.getInstance().getFileList().get(i).length());
 	        	out.println(Protocol.NAME);
-	        	out.println(Location.getInstance().getFileList()[i].getName());
+	        	out.println(FilePicker.getInstance().getFileList().get(i).getName());
 	        	
 	        	byte[] bytes = new byte[4096];
-	        	InputStream in = new FileInputStream(Location.getInstance().getFileList()[i]);
+	        	InputStream in = new FileInputStream(FilePicker.getInstance().getFileList().get(i));
 	            while ((count = in.read(bytes)) > 0)
 	            {
 	                outs.write(bytes, 0, count);
