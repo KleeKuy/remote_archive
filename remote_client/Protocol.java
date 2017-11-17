@@ -6,7 +6,7 @@ public class Protocol
 	
 	static final String LOGOUT ="logout";
 	
-	static final String GET_FILE_LIST = "getfilelist";
+	static final String SENDING_FILE = "sending_file";
 		
 	static final String N_FILES = "files";
 	

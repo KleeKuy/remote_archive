@@ -18,14 +18,12 @@ public class FilePicker extends JFrame implements ActionListener{
 	private static FilePicker instance;
 	
 	private JFileChooser chooser;
-	private ArrayList<File> listOfFiles;
+	private File file;
 	
 	private FilePicker()
 	{
 		super("Choose archive location");
-		
-		listOfFiles = new ArrayList<File>();
-		
+				
 		checkPrevious();
 		
 		JPanel mainPanel = new JPanel();
@@ -49,20 +47,23 @@ public class FilePicker extends JFrame implements ActionListener{
 
 	public void actionPerformed(ActionEvent e)
 	{	
-		//if(e.getActionCommand()=="CancelSelection")
-	//	{
-		//	this.setVisible(false);
-		//	ConnectionInterface.getInstance().update();
-		//}
+		if(e.getActionCommand()=="CancelSelection")
+		{
+			this.setVisible(false);
+			ConnectionInterface.getInstance().setVisible(true);
+		}
 		if(e.getActionCommand()=="ApproveSelection")
 		{
+			System.out.println("approved selection!");
 			String directory = chooser.getSelectedFile().getPath();
 			addFile(directory);		
-			JOptionPane.showMessageDialog(null,"New file - "+ directory +" added");
+			JOptionPane.showMessageDialog(null,"New file - "+ directory +"to be added");
+			setVisible(false);
+			ConnectionInterface.getInstance().getConnection().send(file);
+			ConnectionInterface.getInstance().update();
 		}	
-		setVisible(false);
-		ConnectionInterface.getInstance().update();
-		
+
+		//file = null;
 	}
 	
 	/*
@@ -77,17 +78,17 @@ public class FilePicker extends JFrame implements ActionListener{
 	
 	private void addFile(String directory)
 	{
-		File file = new File(directory);		
-		listOfFiles.add(file);
+		file = new File(directory);		
 	}
 	
-	public ArrayList<File> getFileList()
+	public File getFile()
 	{
-		return listOfFiles;
+		return file;
 	}
 
-	public void deleteFile(int index)
-	{
-		listOfFiles.remove(index);
-	}
+	//public void deleteFile(int index)
+	//{
+	//	listOfFiles.remove(index);
+	//}
+	
 }

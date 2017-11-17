@@ -1,47 +1,97 @@
 	package remote_client;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.*;
+import java.util.ArrayList;
 
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 
-//TODO hmm, maybe we should make two threads here, one that is
-//sending stuff, and the other that is listening to what host says?
 public class Connection {
 	
-	private final int port;
-	private final String hostname;
+	private Socket clientSocket;
+	private PrintWriter out;
+	private BufferedReader inHost;
+    private	OutputStream outs;
+	
 
 	public Connection(final String hostName, String portname)
 	{
 		//TODO possibly read from config port and ip valuse
 		//hence in the future connection class will be storing
 		//port and ip as class variables?
-		hostname = hostName;
-		port = Integer.parseInt(portname);
+		final int port = Integer.parseInt(portname);
 		try
 		{
-		Socket clientSocket = new Socket(hostname, port);
-		} catch(IOException e)
+		clientSocket = new Socket(hostName, port);
+		out = new PrintWriter(clientSocket.getOutputStream(), true);       
+		inHost = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+		outs = clientSocket.getOutputStream();
+		}catch(UnknownHostException e)
 		{
-			//handle
+			JOptionPane.showMessageDialog(null,"Don't know about host " + hostName);
 		}
-
+		catch(IOException e)
+		{
+			JOptionPane.showMessageDialog(null,"Couldn't get I/O for the connection to " + hostName);
+		}
+	}
+	
+	public JList<String> login() throws IOException
+	{
+		out.println(Protocol.LOGIN);
+		return getList();
+	}
+	public JList<String> getList() throws IOException
+	{
+		final int num = Integer.parseInt(inHost.readLine());
+		String[] list = new String[num];
+		for(int i=0; i<num; i++)
+		list[i]=inHost.readLine();
+		return new JList<String>(list);
 	}
 
-	public void connect(final String hostName, String portname)
+	public void send(File file)
+	{
+		System.out.println("sending");
+		out.println(Protocol.SENDING_FILE);
+		out.println(file.length());
+		out.println(file.getName());
+		try
+		{
+    	byte[] bytes = new byte[4096];
+    	InputStream in = new FileInputStream(file);
+    	int count;
+    	int tmp=0;
+    	long size=file.length();
+        while ((count = in.read(bytes)) > 0)
+        {
+        	tmp+=4096;
+            System.out.print(tmp + " out of " +size + "\n");
+            outs.write(bytes, 0, count);
+        }
+        in.close();
+		} catch(IOException e)
+		{
+			JOptionPane.showMessageDialog(null,"Exception raised while sending file!");
+		}
+		System.out.println("sent");
+	}
+	
+	/*public void connect(final String hostName, String portname)
 	{
 		final int port = Integer.parseInt(portname);
 		
 		try 
 		{
-			Socket clientSocket = new Socket(hostName, port);
 			PrintWriter out =
 	                new PrintWriter(clientSocket.getOutputStream(), true);       
 			BufferedReader inHost = new BufferedReader(
@@ -52,7 +102,6 @@ public class Connection {
 			//we connect to host, send stuff and disconnect, future versions
 			//will support keeping connection for some time to enable more
 			//actions
-	        out.println(Protocol.N_FILES);
 	        out.println(FilePicker.getInstance().getFileList().size());
 	        
 	        for(int i=0; i<FilePicker.getInstance().getFileList().size(); i++)
@@ -88,6 +137,22 @@ public class Connection {
 			JOptionPane.showMessageDialog(null,"Couldn't get I/O for the connection to " + hostName);
 		}
 		JOptionPane.showMessageDialog(null,"Conection succesful");
-	}
+	}*/
 
+	public void disconnect()
+	{
+		out.println(Protocol.LOGOUT);
+		try 
+		{
+			out.close();
+			outs.close();
+			inHost.close();	
+			clientSocket.close();
+
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Failed to close socket");
+		}
+	}
 }

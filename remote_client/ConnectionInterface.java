@@ -3,10 +3,12 @@ package remote_client;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -15,9 +17,10 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 	private Connection connection;
 	
 	private JPanel mainPanel;
-	private JButton setLocation;
+	private JButton uploadButton;
 	private JButton deleteButton;
 	private JButton exitButton;
+	private JButton downloadButton;
 	private JList<String> list;
 	
 	private static ConnectionInterface instance;
@@ -36,8 +39,8 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 			mainPanel = new JPanel();
 			mainPanel.setLayout(new BorderLayout());
 			
-			setLocation= new JButton("Pick file to archive"); 
-			setLocation.setPreferredSize(Common.buttonsize());
+			uploadButton= new JButton("Pick file to archive"); 
+			uploadButton.setPreferredSize(Common.buttonsize());
 			
 			exitButton = new JButton("Disconnect");
 			exitButton.setPreferredSize(Common.buttonsize());
@@ -45,15 +48,20 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 			deleteButton = new JButton("Delete file");
 			deleteButton.setPreferredSize(Common.buttonsize());
 			
-			//TODO check files from configs
+			downloadButton = new JButton("Download file");
+			downloadButton.setPreferredSize(Common.buttonsize());
+			
 			String[] data = {};
 			list = new JList<String>(data);
 			list.setLayoutOrientation(JList.VERTICAL);
 
+			JPanel secondPanel = new JPanel();
+			secondPanel.add(exitButton, BorderLayout.WEST);
+			secondPanel.add(downloadButton, BorderLayout.EAST);
 			
 			add(mainPanel);
-			mainPanel.add(exitButton, BorderLayout.SOUTH);
-			mainPanel.add(setLocation,BorderLayout.EAST);
+			mainPanel.add(secondPanel, BorderLayout.SOUTH);
+			mainPanel.add(uploadButton,BorderLayout.EAST);
 			mainPanel.add(deleteButton,BorderLayout.WEST);
 			mainPanel.add(list,BorderLayout.NORTH);
 
@@ -61,57 +69,78 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			setVisible(true);
 			
-			setLocation.addActionListener(this);
+			uploadButton.addActionListener(this);
 			exitButton.addActionListener(this);
 			deleteButton.addActionListener(this);
 	}
 	
 	public void connect(final String hostName, String portname)
 	{
+		mainPanel.remove(list);
 		this.setVisible(true);
-		//Connection connection = new Connection(hostName,portname);
-
+		connection = new Connection(hostName,portname);
+		try
+		{
+			list=connection.login();
+		} catch (IOException e) 
+		{
+			JOptionPane.showMessageDialog(null,"Cant get file list from host");
+		}
+		mainPanel.add(list,BorderLayout.NORTH);
+		SwingUtilities.updateComponentTreeUI(this);
+		System.out.println("logged in");
 	}
 	
+	public Connection getConnection()
+	{
+		return connection;
+	}
+
 	public void update()
 	{
 		mainPanel.remove(list);
-		String[] files = new String[FilePicker.getInstance().getFileList().size()];
-		int i=0;
-		while(i<files.length)
-			files[i] = FilePicker.getInstance().getFileList().get(i++).getName();
-		list = new JList<String>(files);
+		try
+		{
+			list=connection.getList();
+		} catch (IOException e) 
+		{
+			JOptionPane.showMessageDialog(null,"Cant get file list from host");
+		}
 		mainPanel.add(list,BorderLayout.NORTH);
 		SwingUtilities.updateComponentTreeUI(this);
+		System.out.println("connected list gotten");
 		this.setVisible(true);
+
 	}
 	
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
-		 if(e.getSource()==setLocation)
+		 if(e.getSource()==uploadButton)
 		{
 			setVisible(false);
-			FilePicker location = FilePicker.getInstance();
-			location.setVisible(true);
+			FilePicker.getInstance().setVisible(true);
 		}
-		else if(e.getSource()==deleteButton)
+		else if(e.getSource()==deleteButton) //not implemented
 		{
-			int selectedIndex = list.getSelectedIndex();
+			//int selectedIndex = list.getSelectedIndex();
 			
-			if(selectedIndex != -1)
-			{
-				FilePicker.getInstance().deleteFile(selectedIndex);
-				this.setVisible(false);
-				this.update();
-			}
+		//	if(selectedIndex != -1)
+			//{
+				//FilePicker.getInstance().deleteFile(selectedIndex);
+			///	this.setVisible(false);
+			//	this.update();
+			//}
+		}
+		else if(e.getSource()==downloadButton) //not implemented
+		{
+			
 		}
 		else 
 		{
+			connection.disconnect();
 			this.setVisible(false);
 		 	Menu.getInstance().setVisible(true);
 		}
 	}
-
-
 }

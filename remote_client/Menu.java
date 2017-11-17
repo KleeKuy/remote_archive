@@ -73,9 +73,7 @@ public class Menu extends JFrame implements ActionListener{
 	{	
 		if(e.getSource()==logButton)
 		{
-			if(FilePicker.getInstance().getFileList()==null)
-				JOptionPane.showMessageDialog(null,"Please select files to archive");
-			else if(Common.isNumeric(portTextField.getText()))
+			if(Common.isNumeric(portTextField.getText()))
 				{
 				this.setVisible(false);
 				ConnectionInterface.getInstance().connect(ipTextField.getText(), portTextField.getText());
