@@ -19,6 +19,7 @@ public class Menu extends JFrame implements ActionListener{
 	private JTextField portTextField;
 	private JButton logButton;
 	private JButton setLocation;
+	private JButton deleteButton;
 	private JButton exitButton;
 	private JList<String> list;
 	
@@ -32,18 +33,27 @@ public class Menu extends JFrame implements ActionListener{
 	    final Dimension buttonsize = new Dimension(400,100);
 		mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
+		
 		logButton = new JButton("Log in");
 		logButton.setPreferredSize(buttonsize);
+		
 		setLocation= new JButton("Pick file to archive"); 
 		setLocation.setPreferredSize(buttonsize);
+		
 	    ipTextField = new JTextField("Specify host IP");
 		ipTextField.setPreferredSize(buttonsize);
+		
 		portTextField = new JTextField("Specify host port");
 		portTextField.setPreferredSize(buttonsize);
+		
 		exitButton = new JButton("Exit");
 		exitButton.setPreferredSize(buttonsize);
+		
+		deleteButton = new JButton("Delete from list");
+		deleteButton.setPreferredSize(buttonsize);
+		
 		//TODO check files from configs
-		String[] data = {"aajuhjkuha", "bbb"};
+		String[] data = {};
 		list = new JList<String>(data) 
 				{
 			//TODO would prolly need to be able to also remove files from list
@@ -53,11 +63,15 @@ public class Menu extends JFrame implements ActionListener{
 		secondPanel.add(logButton,BorderLayout.WEST);
 		secondPanel.add(exitButton,BorderLayout.EAST);
 		
+		JPanel thirdPanel = new JPanel();
+		thirdPanel.add(setLocation,BorderLayout.WEST);
+		thirdPanel.add(deleteButton,BorderLayout.EAST);
+		
 		add(mainPanel);
 		mainPanel.add(secondPanel, BorderLayout.SOUTH);
 		mainPanel.add(ipTextField,BorderLayout.EAST);
 		mainPanel.add(portTextField,BorderLayout.WEST);
-		mainPanel.add(setLocation,BorderLayout.NORTH);
+		mainPanel.add(thirdPanel,BorderLayout.NORTH);
 		mainPanel.add(list,BorderLayout.CENTER);
 
 		pack();
@@ -67,6 +81,7 @@ public class Menu extends JFrame implements ActionListener{
 		logButton.addActionListener(this);
 		setLocation.addActionListener(this);
 		exitButton.addActionListener(this);
+		deleteButton.addActionListener(this);
 
 	}
 	
@@ -95,7 +110,6 @@ public class Menu extends JFrame implements ActionListener{
 
 	public void actionPerformed(ActionEvent e)
 	{	
-
 		if(e.getSource()==logButton)
 		{
 			if(FilePicker.getInstance().getFileList()==null)
@@ -113,6 +127,17 @@ public class Menu extends JFrame implements ActionListener{
 			setVisible(false);
 			FilePicker location = FilePicker.getInstance();
 			location.setVisible(true);
+		}
+		else if(e.getSource()==deleteButton)
+		{
+			int selectedIndex = list.getSelectedIndex();
+			
+			if(selectedIndex != -1)
+			{
+				FilePicker.getInstance().deleteFile(selectedIndex);
+				this.setVisible(false);
+				this.setFocus();
+			}
 		}
 		else
 			System.exit(1);

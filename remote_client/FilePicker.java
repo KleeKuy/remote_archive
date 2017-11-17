@@ -85,4 +85,9 @@ public class FilePicker extends JFrame implements ActionListener{
 		return listOfFiles;
 	}
 
+	public void deleteFile(int index)
+	{
+		System.out.println(listOfFiles.get(index).getPath());
+		listOfFiles.remove(index);
+	}
 }
