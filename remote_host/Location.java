@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -17,7 +18,7 @@ public class Location extends JFrame implements ActionListener{
 	private static Location instance;
 	
 	private JFileChooser chooser;
-	private File[] listOfFiles;
+	private ArrayList<File> listOfFiles;
 	private String directory;
 
 	
@@ -74,13 +75,16 @@ public class Location extends JFrame implements ActionListener{
 		//TODO implement
 	}
 	
-	private void setFileList()
+	public void setFileList()
 	{
+		listOfFiles= new ArrayList<File>();
 		File folder = new File(directory);
-		listOfFiles = folder.listFiles();
+		File[] tmp = folder.listFiles();
+		for(int i = 0; i<tmp.length; i++)
+			listOfFiles.add(tmp[i]);
 	}
 	
-	public File[] getFileList()
+	public ArrayList<File> getFileList()
 	{
 		return listOfFiles;
 	}

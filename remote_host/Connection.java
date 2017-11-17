@@ -11,79 +11,127 @@ import java.net.Socket;
 
 import javax.swing.JOptionPane;
 
-public class Connection
+
+public class Connection implements Runnable
 {
+	private final int port;
+	private ServerSocket serverSocket;
+	private Socket socket;
+	private BufferedReader in;
+	private PrintWriter outClient;
+	private InputStream  ins;
+	private Thread thread;
+	
 	public Connection(String portstring)
 	{
-		final int port = Integer.parseInt(portstring);
-		try 
+		port = Integer.parseInt(portstring);
+		
+		try
 		{
-			ServerSocket serverSocket =
-					new ServerSocket (port);
-			Socket socket = serverSocket.accept();   
-			
-			BufferedReader in = new BufferedReader(
+			serverSocket = new ServerSocket (port);
+			socket = serverSocket.accept();   
+			in = new BufferedReader(
 	                new InputStreamReader(socket.getInputStream()));
+			outClient = new PrintWriter(socket.getOutputStream(), true);       
 			
-			PrintWriter outClient =
-	                new PrintWriter(socket.getOutputStream(), true);       
-			
-			InputStream  ins = socket.getInputStream();
-			
-			//TODO do smth with dis n0_of_files, also TODO add protocol class
-			int number_of_files = 0;
-			if(in.readLine()=="files");
-			number_of_files=Integer.parseInt(in.readLine());
-			
-			for(int i=0; i<number_of_files; i++)
-			{
-				System.out.println(in.readLine());
-				
-				boolean onePacket = false;
-				
-				int size = Integer.parseInt(in.readLine())/4096;
-				if(size==0)
-					onePacket = true;
-				byte[] bytes = new byte[4096];
-				System.out.println(in.readLine());
-				String name = in.readLine();
-				
-				FileOutputStream out = new FileOutputStream(Location.getInstance().getDirectory() + "\\" + name);
-
-				System.out.println(Location.getInstance().getDirectory() + name);
-				
-		        int count;
-
-		        if(!onePacket)
-		        while ((count = ins.read(bytes)) > 0 && size > 0) 
-		        {
-		        	//System.out.println(bytes);
-		        	System.out.println(size);
-		        	size--;
-		            out.write(bytes, 0, count);
-		        }
-		        else
-		        {
-		        	System.out.println("was one");
-		        	count = ins.read(bytes);
-		        	out.write(bytes, 0, count);
-		        }
-		        	
-
-		        System.out.println("smth");
-		        outClient.println("file_received");
-		        out.close();
-
-			}
-			
-			
-			serverSocket.close();
-		}
-		catch(IOException e)
+			ins = socket.getInputStream();
+		} catch(IOException e)
 		{
 			System.out.println("Exception caught when trying to listen on port "
 	                + port + " or listening for a connection");
 		}
+		thread = new Thread(this);
+		thread.start();
+	}
+	
+	public void receive()
+	{
+		try
+		{
+		int packetNumber = Integer.parseInt(in.readLine())/4096;
+		final String name = in.readLine();		
+		byte[] bytes = new byte[4096];		
+		FileOutputStream out = new FileOutputStream(Location.getInstance().getDirectory() + "\\" + name);
+		System.out.println(Location.getInstance().getDirectory() + name);
+        int count;
+        System.out.println(packetNumber);
+        if(packetNumber!=0)
+        while ((count = ins.read(bytes)) > 0 && packetNumber > 0) 
+        {
+        	System.out.println(bytes);
+        	System.out.println(packetNumber);
+        	packetNumber--;
+            out.write(bytes, 0, count);
+        }
+        else
+        {
+        	System.out.println("was one");
+        	count = ins.read(bytes);
+        	out.write(bytes, 0, count);
+        }
+        System.out.print("smth");
+        out.close();
+		} catch(IOException e)
+		{
+			JOptionPane.showMessageDialog(null,"Exception raised while receiving file!");
+		}
+	}
+
+	private void updateList()
+	{
+		Location.getInstance().setFileList();
+		int len = Location.getInstance().getFileList().size();
+		outClient.println(len);
+		for(int i=0; i<len; i++)
+		{
+			outClient.println(Location.getInstance().getFileList().get(i).getName());
+		}
+	}
+	
+	private void stop() throws IOException
+	{
+		in.close();
+		outClient.close();
+		ins.close();
+		serverSocket.close();
+		socket.close();
+		thread.interrupt();
 		
 	}
+	
+	@Override
+	public void run()
+	{
+		boolean end = false;
+		String msg = null;
+		while(end==false)
+		{
+		try
+		{
+			msg = in.readLine();
+			System.out.println(msg);
+			switch(msg)
+			{
+				case Protocol.LOGIN:
+					updateList();
+					break;
+				case Protocol.LOGOUT:
+					stop();
+					end=true;
+					break;
+				case Protocol.SENDING_FILE:
+					receive();
+					updateList();
+					break;
+				default:
+					System.out.println("Incorrect message!");
+					break;		
+			}
+			} catch (IOException e) 
+			{
+				JOptionPane.showMessageDialog(null,"Error while receiving message!");
+			}
+		}			
+	}
+	
 }

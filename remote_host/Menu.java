@@ -62,7 +62,10 @@ public class Menu extends JFrame implements ActionListener{
 	{
 		if(e.getSource()==logButton)
 		{
-			Connection connection = new Connection(ipTextField.getText());
+			if(Location.getInstance().getFileList()==null)
+				JOptionPane.showMessageDialog(null,"Please select location!");
+			else
+				new Connection(ipTextField.getText());
 		}
 		else
 			Location.getInstance().setVisible(true);
