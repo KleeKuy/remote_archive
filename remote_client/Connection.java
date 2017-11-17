@@ -1,4 +1,4 @@
-package remote_client;
+	package remote_client;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -14,12 +14,25 @@ import javax.swing.JOptionPane;
 //TODO hmm, maybe we should make two threads here, one that is
 //sending stuff, and the other that is listening to what host says?
 public class Connection {
+	
+	private final int port;
+	private final String hostname;
 
-	public Connection()
+	public Connection(final String hostName, String portname)
 	{
 		//TODO possibly read from config port and ip valuse
 		//hence in the future connection class will be storing
 		//port and ip as class variables?
+		hostname = hostName;
+		port = Integer.parseInt(portname);
+		try
+		{
+		Socket clientSocket = new Socket(hostname, port);
+		} catch(IOException e)
+		{
+			//handle
+		}
+
 	}
 
 	public void connect(final String hostName, String portname)

@@ -49,19 +49,20 @@ public class FilePicker extends JFrame implements ActionListener{
 
 	public void actionPerformed(ActionEvent e)
 	{	
-		if(e.getActionCommand()=="CancelSelection")
-		{
-			Menu.getInstance().setFocus();
-		}
-		else if(e.getActionCommand()=="ApproveSelection")
+		//if(e.getActionCommand()=="CancelSelection")
+	//	{
+		//	this.setVisible(false);
+		//	ConnectionInterface.getInstance().update();
+		//}
+		if(e.getActionCommand()=="ApproveSelection")
 		{
 			String directory = chooser.getSelectedFile().getPath();
 			addFile(directory);		
 			JOptionPane.showMessageDialog(null,"New file - "+ directory +" added");
-			
 		}	
 		setVisible(false);
-		Menu.getInstance().setFocus();
+		ConnectionInterface.getInstance().update();
+		
 	}
 	
 	/*
@@ -87,7 +88,6 @@ public class FilePicker extends JFrame implements ActionListener{
 
 	public void deleteFile(int index)
 	{
-		System.out.println(listOfFiles.get(index).getPath());
 		listOfFiles.remove(index);
 	}
 }
