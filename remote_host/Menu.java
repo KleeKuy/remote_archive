@@ -65,7 +65,17 @@ public class Menu extends JFrame implements ActionListener{
 			if(Location.getInstance().getFileList()==null)
 				JOptionPane.showMessageDialog(null,"Please select location!");
 			else
-				new Connection(ipTextField.getText());
+			{
+				  try  
+				  {  
+				    Double.parseDouble(ipTextField.getText());  
+					new Connection(ipTextField.getText());
+				  }  
+				  catch(NumberFormatException nfe)  
+				  {  
+					  JOptionPane.showMessageDialog(null,"Please enter numeric port value!");
+				  } 
+			}
 		}
 		else
 			Location.getInstance().setVisible(true);

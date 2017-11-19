@@ -84,13 +84,19 @@ public class Location extends JFrame implements ActionListener{
 			listOfFiles.add(tmp[i]);
 	}
 	
-	public ArrayList<File> getFileList()
+	public final ArrayList<File> getFileList()
 	{
 		return listOfFiles;
 	}
 
-	public String getDirectory()
+	public final String getDirectory()
 	{
 		return directory;
+	}
+	
+	public void deleteFile(int index)
+	{
+		listOfFiles.get(index).delete();
+		listOfFiles.remove(index);
 	}
 }
