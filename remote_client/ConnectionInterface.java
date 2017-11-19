@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.UnknownHostException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -12,19 +13,18 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.sun.glass.events.WindowEvent;
+
 public class ConnectionInterface extends JFrame implements ActionListener {
 
 	private Connection connection;
-	
 	private JPanel mainPanel;
 	private JButton uploadButton;
 	private JButton deleteButton;
 	private JButton exitButton;
 	private JButton downloadButton;
 	private JList<String> list;
-	
 	private static ConnectionInterface instance;
-	
 	public static ConnectionInterface getInstance()
 	{
 		if(instance == null)
@@ -69,6 +69,7 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 			setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 			setVisible(true);
 			
+			downloadButton.addActionListener(this);
 			uploadButton.addActionListener(this);
 			exitButton.addActionListener(this);
 			deleteButton.addActionListener(this);
@@ -78,20 +79,32 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 	{
 		mainPanel.remove(list);
 		this.setVisible(true);
-		connection = new Connection(hostName,portname);
 		try
 		{
-			list=connection.login();
-		} catch (IOException e) 
+		connection = new Connection(hostName,portname);
+		list=connection.login();
+
+		}catch(UnknownHostException e)
 		{
-			JOptionPane.showMessageDialog(null,"Cant get file list from host");
+			JOptionPane.showMessageDialog(null,"Don't know about host " + hostName);
+			this.setVisible(false);
+			Menu.getInstance().setVisible(true);
+			return;
 		}
+		catch(IOException e)
+		{
+			JOptionPane.showMessageDialog(null,"Couldn't get I/O for the connection to " + hostName);
+			this.setVisible(false);
+			Menu.getInstance().setVisible(true);
+			return;
+		}
+		
 		mainPanel.add(list,BorderLayout.NORTH);
 		SwingUtilities.updateComponentTreeUI(this);
 		System.out.println("logged in");
 	}
 	
-	public Connection getConnection()
+	public final Connection getConnection()
 	{
 		return connection;
 	}
@@ -110,7 +123,28 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 		SwingUtilities.updateComponentTreeUI(this);
 		System.out.println("connected list gotten");
 		this.setVisible(true);
-
+	}
+	
+	private final void deleteRequest()
+	{
+		int selectedIndex = list.getSelectedIndex();
+		if(selectedIndex != -1)
+			connection.delete(selectedIndex);
+	}
+	
+	private final void downloadRequest()
+	{
+		int selectedIndex = list.getSelectedIndex();
+		if(selectedIndex == -1)
+			JOptionPane.showMessageDialog(null,"No file selected!");
+		else
+		{
+			connection.setIndex(selectedIndex);
+			JOptionPane.showMessageDialog(null,"Select directory to download file");
+			this.setVisible(false);
+			FilePicker.getInstance().pickDir();
+			FilePicker.getInstance().setVisible(true);
+		}
 	}
 	
 	@Override
@@ -119,22 +153,17 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 		 if(e.getSource()==uploadButton)
 		{
 			setVisible(false);
+			FilePicker.getInstance().pickFile();
 			FilePicker.getInstance().setVisible(true);
 		}
-		else if(e.getSource()==deleteButton) //not implemented
+		else if(e.getSource()==deleteButton)
 		{
-			//int selectedIndex = list.getSelectedIndex();
-			
-		//	if(selectedIndex != -1)
-			//{
-				//FilePicker.getInstance().deleteFile(selectedIndex);
-			///	this.setVisible(false);
-			//	this.update();
-			//}
+			deleteRequest();
+			update();
 		}
-		else if(e.getSource()==downloadButton) //not implemented
+		else if(e.getSource()==downloadButton)
 		{
-			
+			downloadRequest();
 		}
 		else 
 		{

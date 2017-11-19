@@ -1,9 +1,10 @@
-	package remote_client;
+package remote_client;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -15,42 +16,37 @@ import java.util.ArrayList;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 
+
 public class Connection {
 	
 	private Socket clientSocket;
 	private PrintWriter out;
 	private BufferedReader inHost;
     private	OutputStream outs;
-	
+    private InputStream ins;
+	private int index;
 
-	public Connection(final String hostName, String portname)
+	public Connection(final String hostName, String portname) throws UnknownHostException, IOException
 	{
 		//TODO possibly read from config port and ip valuse
 		//hence in the future connection class will be storing
 		//port and ip as class variables?
 		final int port = Integer.parseInt(portname);
-		try
-		{
+
 		clientSocket = new Socket(hostName, port);
 		out = new PrintWriter(clientSocket.getOutputStream(), true);       
 		inHost = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		outs = clientSocket.getOutputStream();
-		}catch(UnknownHostException e)
-		{
-			JOptionPane.showMessageDialog(null,"Don't know about host " + hostName);
-		}
-		catch(IOException e)
-		{
-			JOptionPane.showMessageDialog(null,"Couldn't get I/O for the connection to " + hostName);
-		}
+		ins = clientSocket.getInputStream();
+		
 	}
 	
-	public JList<String> login() throws IOException
+	public final JList<String> login() throws IOException
 	{
 		out.println(Protocol.LOGIN);
 		return getList();
 	}
-	public JList<String> getList() throws IOException
+	public final JList<String> getList() throws IOException
 	{
 		final int num = Integer.parseInt(inHost.readLine());
 		String[] list = new String[num];
@@ -59,23 +55,21 @@ public class Connection {
 		return new JList<String>(list);
 	}
 
-	public void send(File file)
+	public final void send(File file)
 	{
 		System.out.println("sending");
 		out.println(Protocol.SENDING_FILE);
 		out.println(file.length());
 		out.println(file.getName());
+		
 		try
 		{
     	byte[] bytes = new byte[4096];
     	InputStream in = new FileInputStream(file);
     	int count;
-    	int tmp=0;
     	long size=file.length();
         while ((count = in.read(bytes)) > 0)
         {
-        	tmp+=4096;
-            System.out.print(tmp + " out of " +size + "\n");
             outs.write(bytes, 0, count);
         }
         in.close();
@@ -85,6 +79,47 @@ public class Connection {
 		}
 		System.out.println("sent");
 	}
+	
+	
+	
+	public final void delete(int index)
+	{
+		out.println(Protocol.DELETE);
+		out.println(index);
+	}
+	
+	public final void download(String directory)
+	{
+		out.println(Protocol.DOWNLOAD);
+		out.println(index);
+		try
+		{
+		long size = Long.parseLong(inHost.readLine());
+		final String name = inHost.readLine();		
+		byte[] bytes = new byte[4096];		
+		FileOutputStream out = new FileOutputStream(directory + "\\" + name);
+		System.out.println(directory + name);
+        int count;
+        int sent =0;
+        while (sent < size &&(count = ins.read(bytes)) > 0) 
+        {
+        	sent+=count;
+            out.write(bytes, 0, count);
+        }
+        out.close();
+		} catch(IOException e)
+		{
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null,"Exception raised while receiving file!");
+		}
+	}
+	
+	public void setIndex(int index)
+	{
+		this.index=index;
+	}
+	
+	
 	
 	/*public void connect(final String hostName, String portname)
 	{
@@ -145,7 +180,7 @@ public class Connection {
 		try 
 		{
 			out.close();
-			outs.close();
+		//	outs.close();
 			inHost.close();	
 			clientSocket.close();
 

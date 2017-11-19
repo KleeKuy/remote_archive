@@ -20,6 +20,13 @@ public class FilePicker extends JFrame implements ActionListener{
 	private JFileChooser chooser;
 	private File file;
 	
+	private enum action
+	{
+		DOWNLOADING, UPLOADING
+	}
+	
+	private action cmd;
+	
 	private FilePicker()
 	{
 		super("Choose archive location");
@@ -28,7 +35,7 @@ public class FilePicker extends JFrame implements ActionListener{
 		
 		JPanel mainPanel = new JPanel();
 		chooser = new JFileChooser();
-	    chooser.setAcceptAllFileFilterUsed(false);
+	    chooser.setAcceptAllFileFilterUsed(true);
 		
 		add(mainPanel);
 		mainPanel.add(chooser, BorderLayout.SOUTH);
@@ -36,6 +43,19 @@ public class FilePicker extends JFrame implements ActionListener{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		chooser.addActionListener(this);
+	}
+	
+	public void pickDir()
+	{
+		cmd = action.DOWNLOADING;
+		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+	}
+	
+	public void pickFile()
+	{
+		file = null;
+		cmd = action.UPLOADING;
+		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 	}
 	
 	public static FilePicker getInstance()
@@ -54,13 +74,29 @@ public class FilePicker extends JFrame implements ActionListener{
 		}
 		if(e.getActionCommand()=="ApproveSelection")
 		{
-			System.out.println("approved selection!");
-			String directory = chooser.getSelectedFile().getPath();
-			addFile(directory);		
-			JOptionPane.showMessageDialog(null,"New file - "+ directory +"to be added");
-			setVisible(false);
-			ConnectionInterface.getInstance().getConnection().send(file);
-			ConnectionInterface.getInstance().update();
+			switch(cmd)
+			{
+			case UPLOADING:
+				System.out.println("approved selection!");
+				String directory = chooser.getSelectedFile().getPath();
+				addFile(directory);		
+				JOptionPane.showMessageDialog(null,"New file - "+ directory +"to be added");
+				setVisible(false);
+				ConnectionInterface.getInstance().getConnection().send(file);
+				ConnectionInterface.getInstance().update();
+				break;
+			case DOWNLOADING:
+				String dir = directory = chooser.getSelectedFile().getPath();;
+				addFile(dir);		
+				JOptionPane.showMessageDialog(null,"Download directory - "+ dir);
+				setVisible(false);
+				ConnectionInterface.getInstance().getConnection().download(dir);
+				ConnectionInterface.getInstance().setVisible(true);
+				break;
+			default:
+				System.out.println("Something went wrong...");
+				break;
+			}
 		}	
 
 		//file = null;
@@ -81,14 +117,9 @@ public class FilePicker extends JFrame implements ActionListener{
 		file = new File(directory);		
 	}
 	
-	public File getFile()
+	public final File getFile()
 	{
 		return file;
 	}
-
-	//public void deleteFile(int index)
-	//{
-	//	listOfFiles.remove(index);
-	//}
 	
 }
