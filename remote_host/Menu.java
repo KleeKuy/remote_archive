@@ -18,16 +18,22 @@ public class Menu extends JFrame implements ActionListener{
 	private static final long serialVersionUID = 1L;
 	
 	private JTextField ipTextField;
+	private JButton logButton;
+	private JButton setLocation;
 	
-	public Menu()
+	private static Menu instance;
+	
+	private Menu()
 	{
 		super("Remote archive host");
 		
 	    final Dimension buttonsize = new Dimension(400,100);
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
-		JButton logButton = new JButton("Start server");
+		logButton = new JButton("Start server");
 		logButton.setPreferredSize(buttonsize);
+		setLocation = new JButton("Set location");
+		setLocation.setPreferredSize(buttonsize);
 	    ipTextField = new JTextField("Specify host port");
 		ipTextField.setPreferredSize(buttonsize);
 		
@@ -35,18 +41,43 @@ public class Menu extends JFrame implements ActionListener{
 		add(mainPanel);
 		mainPanel.add(logButton, BorderLayout.SOUTH);
 		mainPanel.add(ipTextField,BorderLayout.NORTH);
+		mainPanel.add(setLocation,BorderLayout.CENTER);
 		pack();
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 		
 		logButton.addActionListener(this);
+		setLocation.addActionListener(this);
 
+	}
+	
+	static public Menu getInstance()
+	{
+		if(instance == null)
+			instance = new Menu();
+		return instance;
 	}
 
 	public void actionPerformed(ActionEvent e)
 	{
-        //JOptionPane.showMessageDialog(null,Connection.Connect(ipTextField.getText()));
-		Connection connection = new Connection(ipTextField.getText());
-		JOptionPane.showMessageDialog(null,"done");
+		if(e.getSource()==logButton)
+		{
+			if(Location.getInstance().getFileList()==null)
+				JOptionPane.showMessageDialog(null,"Please select location!");
+			else
+			{
+				  try  
+				  {  
+				    Double.parseDouble(ipTextField.getText());  
+					new Connection(ipTextField.getText());
+				  }  
+				  catch(NumberFormatException nfe)  
+				  {  
+					  JOptionPane.showMessageDialog(null,"Please enter numeric port value!");
+				  } 
+			}
+		}
+		else
+			Location.getInstance().setVisible(true);
 	}
 }
