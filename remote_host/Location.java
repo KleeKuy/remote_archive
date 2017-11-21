@@ -13,21 +13,16 @@ import javax.swing.JPanel;
 
 public class Location extends JFrame implements ActionListener{
 	
-	private static final long serialVersionUID = 1L;
-
-	private static Location instance;
-	
+	private static final long serialVersionUID = 1L;	
 	private JFileChooser chooser;
 	private ArrayList<File> listOfFiles;
 	private String directory;
 
 	
-	private Location()
+	public Location()
 	{
 		super("Choose archive location");
-		
-		checkPrevious();
-		
+				
 		JPanel mainPanel = new JPanel();
 		chooser = new JFileChooser();
 	    chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -39,13 +34,6 @@ public class Location extends JFrame implements ActionListener{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		chooser.addActionListener(this);
-	}
-	
-	public static Location getInstance()
-	{
-		if(instance==null)
-			instance = new Location();
-		return instance;
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -65,17 +53,7 @@ public class Location extends JFrame implements ActionListener{
 		Menu.getInstance().setVisible(true);
 	}
 	
-	/*
-	 * Checks in config files whether there is a location 
-	 * set previously
-	 */
-	public void checkPrevious()
-	{
-		System.out.println("to be implmented");
-		//TODO implement
-	}
-	
-	public void setFileList()
+	synchronized public void setFileList()
 	{
 		listOfFiles= new ArrayList<File>();
 		File folder = new File(directory);

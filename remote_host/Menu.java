@@ -20,6 +20,7 @@ public class Menu extends JFrame implements ActionListener{
 	private JTextField ipTextField;
 	private JButton logButton;
 	private JButton setLocation;
+	private Location location;
 	
 	private static Menu instance;
 	
@@ -27,6 +28,8 @@ public class Menu extends JFrame implements ActionListener{
 	{
 		super("Remote archive host");
 		
+		location = null;
+
 	    final Dimension buttonsize = new Dimension(400,100);
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BorderLayout());
@@ -62,14 +65,14 @@ public class Menu extends JFrame implements ActionListener{
 	{
 		if(e.getSource()==logButton)
 		{
-			if(Location.getInstance().getFileList()==null)
+			if(location==null)
 				JOptionPane.showMessageDialog(null,"Please select location!");
 			else
 			{
 				  try  
 				  {  
 				    Double.parseDouble(ipTextField.getText());  
-					new Connection(ipTextField.getText());
+					new Connection(ipTextField.getText(),location);
 				  }  
 				  catch(NumberFormatException nfe)  
 				  {  
@@ -78,6 +81,9 @@ public class Menu extends JFrame implements ActionListener{
 			}
 		}
 		else
-			Location.getInstance().setVisible(true);
+		{
+			location = new Location();
+			location.setVisible(true);
+		}
 	}
 }

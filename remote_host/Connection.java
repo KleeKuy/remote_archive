@@ -11,12 +11,13 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Objects;
 
 import javax.swing.JOptionPane;
 
 public class Connection implements Runnable
 {
-	private final int port;
+	private int port;
 	private ServerSocket serverSocket;
 	private Socket socket;
 	private BufferedReader in;
@@ -24,15 +25,22 @@ public class Connection implements Runnable
 	private InputStream ins;
 	private OutputStream outs;
 	private Thread thread;
+	private Location location;
 	
-	public Connection(String portstring)
+	public Connection(String portstring, Location loc)
 	{
+		location = loc;
 		port = Integer.parseInt(portstring);
-		
+		thread = new Thread(this);
+		thread.start();
+	}
+	
+	private void connect()
+	{
 		try
 		{
 			serverSocket = new ServerSocket (port);
-			socket = serverSocket.accept();   
+			socket = serverSocket.accept();  
 			outs = socket.getOutputStream();
 			in = new BufferedReader(
 	                new InputStreamReader(socket.getInputStream()));
@@ -43,8 +51,6 @@ public class Connection implements Runnable
 			System.out.println("Exception caught when trying to listen on port "
 	                + port + " or listening for a connection");
 		}
-		thread = new Thread(this);
-		thread.start();
 	}
 	
 	private final void receive()
@@ -52,10 +58,21 @@ public class Connection implements Runnable
 		try
 		{
 		long size = Long.parseLong(in.readLine());
-		final String name = in.readLine();		
+		String name = in.readLine();	
+		
+		for(File file : location.getFileList())
+		{
+			if(Objects.equals(file.getName(), name) && file.length()==size)
+			{
+				outClient.println(Protocol.ABORT_SEND);
+				System.out.println("aborting");
+				return;
+			}
+		}
+		outClient.println(Protocol.CONFIRM_SEND);
 		byte[] bytes = new byte[4096];		
-		FileOutputStream out = new FileOutputStream(Location.getInstance().getDirectory() + "\\" + name);
-		System.out.println(Location.getInstance().getDirectory() + name);
+		FileOutputStream out = new FileOutputStream(location.getDirectory() + "\\" + name);
+		System.out.println(location.getDirectory() + name);
         int count;
         int sent=0;
         while (sent < size && (count = ins.read(bytes)) > 0)
@@ -74,12 +91,12 @@ public class Connection implements Runnable
 
 	private final void updateList()
 	{
-		Location.getInstance().setFileList();
-		int len = Location.getInstance().getFileList().size();
+		location.setFileList();
+		int len = location.getFileList().size();
 		outClient.println(len);
 		for(int i=0; i<len; i++)
 		{
-			outClient.println(Location.getInstance().getFileList().get(i).getName());
+			outClient.println(location.getFileList().get(i).getName());
 		}
 	}
 	
@@ -96,13 +113,13 @@ public class Connection implements Runnable
 	private final void delete() throws IOException
 	{
 		int index = Integer.parseInt(in.readLine());
-		Location.getInstance().deleteFile(index);
+		location.deleteFile(index);
 	}
 	
 	private final void sendToClient() throws IOException
 	{
 		int index = Integer.parseInt(in.readLine());
-		File file = Location.getInstance().getFileList().get(index);
+		File file = location.getFileList().get(index);
 		System.out.println("sending " + file.getName());
 		
 		outClient.println(file.length());
@@ -121,6 +138,7 @@ public class Connection implements Runnable
 	@Override
 	public void run()
 	{
+		connect();
 		boolean end = false;
 		String msg = null;
 		while(end==false)
@@ -133,6 +151,7 @@ public class Connection implements Runnable
 			{
 				case Protocol.LOGIN:
 					updateList();
+					Thread.sleep(2000);
 					break;
 				case Protocol.LOGOUT:
 					stop();
@@ -158,6 +177,8 @@ public class Connection implements Runnable
 				e.printStackTrace();
 				JOptionPane.showMessageDialog(null,"Error while communicating with host!");
 				System.exit(1);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
 		}			
 	}
