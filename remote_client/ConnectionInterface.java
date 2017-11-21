@@ -14,12 +14,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-
+/*
+ * Interface for connection, contains connection menu
+ * which is used by user to communicate with host
+ */
 public class ConnectionInterface extends JFrame implements ActionListener {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1L;
 	private Connection connection;
 	private JPanel mainPanel;
@@ -27,6 +27,9 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 	private JButton deleteButton;
 	private JButton exitButton;
 	private JButton downloadButton;
+	/*
+	 * List of files archivized
+	 */
 	private JList<String> list;
 	private static ConnectionInterface instance;
 	
@@ -127,6 +130,9 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 	 	Menu.getInstance().setVisible(true);
 	}
 
+	/*
+	 * updates list of files and refreshes the list
+	 */
 	synchronized public void update()
 	{
 		try
@@ -168,6 +174,9 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 		}
 	}
 	
+	/*
+	 * updates list of files and refreshes the list
+	 */
 	synchronized public void synchronizeList(String[] stringList)
 	{
 		mainPanel.remove(list);

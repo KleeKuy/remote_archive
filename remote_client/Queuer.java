@@ -3,9 +3,20 @@ package remote_client;
 import java.io.File;
 import java.util.ArrayList;
 
+/**
+ * Class that is used to keep all the actions performed by user, so that
+ * all downloading/uploading is done in the background while user can continue
+ * to use the application. Every action performed by user is added to events 
+ * ArrayList and the actions are executed one by one in run method. If there are
+ * no actions in queue thread waits (this.wait) and is notified when new action
+ * is added.
+ */
 public class Queuer implements Runnable{
 
 	private static Queuer instance;
+	/*
+	 * List with user actions that are not yet executed
+	 */
 	private ArrayList<queEvent> events;
 	private Thread thread;
 	
@@ -47,12 +58,11 @@ public class Queuer implements Runnable{
 	
 	synchronized private void waiting()
 	{
-		System.out.println("start to wait");
 		try 
 		{
 			this.wait();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
+		} catch (InterruptedException e)
+		{
 			e.printStackTrace();
 		}
 	}
@@ -60,13 +70,10 @@ public class Queuer implements Runnable{
 	@Override
 	public void run() 
 	{
-		System.out.println("run first");
 		while(true)
 		{
-			System.out.println("WHILE");
 			if(events.isEmpty()==false)
 			{
-				System.out.println("to execute");
 				events.get(0).execute();
 				events.remove(0);
 			} else
@@ -77,11 +84,18 @@ public class Queuer implements Runnable{
 
 } //Queuer
 
+/*
+ * Abstract class that is base for all the event classes
+ * so that those classes can be hold in one container
+ */
 abstract class queEvent
 {
 	 abstract public void execute();
 }
 
+/*
+ * Class representing download event that is to be added to queue
+ */
 class queEventDownload extends queEvent
 {
 	private int index;
@@ -100,6 +114,9 @@ class queEventDownload extends queEvent
 	}
 }
 
+/*
+ * Class representing upload event that is to be added to queue
+ */
 class queEventUpload extends queEvent
 {
 	private File file;
@@ -118,6 +135,9 @@ class queEventUpload extends queEvent
 	
 }
 
+/*
+ * Class representing delete event that is to be added to queue
+ */
 class queEventDelete extends queEvent
 {
 

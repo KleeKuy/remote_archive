@@ -2,6 +2,10 @@ package remote_client;
 
 import java.awt.Dimension;
 
+/*
+ * Class containing common methods and variables
+ */
+
 public class Common {
 
 	public static boolean isNumeric(String str)  

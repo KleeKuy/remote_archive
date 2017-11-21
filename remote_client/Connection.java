@@ -14,7 +14,10 @@ import java.util.Objects;
 
 import javax.swing.JOptionPane;
 
-
+/*
+ * Class that is responsible for all the
+ * connection with host application
+ */
 public class Connection {
 	
 	private Socket clientSocket;
@@ -26,21 +29,25 @@ public class Connection {
 	public Connection(final String hostName, String portname) throws UnknownHostException, IOException
 	{
 		final int port = Integer.parseInt(portname);
-
 		clientSocket = new Socket(hostName, port);
 		out = new PrintWriter(clientSocket.getOutputStream(), true);       
 		inHost = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 		outs = clientSocket.getOutputStream();
 		ins = clientSocket.getInputStream();
-		
 	}
 	
+	/*
+	 * Application logs in after connecting
+	 */
 	public final String[] login() throws IOException
 	{
 		out.println(Protocol.LOGIN);
 		return getList();
 	}
 	
+	/*
+	 * Method that gets from host file list
+	 */
 	public final String[] getList() throws IOException
 	{
 		final int num = Integer.parseInt(inHost.readLine());
@@ -52,7 +59,6 @@ public class Connection {
 
 	public final void send(File file)
 	{
-		System.out.println("sending");
 		out.println(Protocol.SENDING_FILE);
 		out.println(file.length());
 		out.println(file.getName());
@@ -61,7 +67,6 @@ public class Connection {
 		{
 		if(Objects.equals(inHost.readLine(),Protocol.ABORT_SEND))
 		{
-			System.out.println("ABOTR!");
 			JOptionPane.showMessageDialog(null,"This file is already archivized!");
 			return;	
 		}
@@ -80,8 +85,6 @@ public class Connection {
 		}
 		System.out.println("sent");
 	}
-	
-	
 	
 	public final void delete(int index)
 	{

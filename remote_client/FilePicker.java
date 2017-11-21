@@ -9,6 +9,11 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+/*
+ * Class that is used for picking directories where to 
+ * download files from host, or to picking files to upload
+ * to host
+ */
 public class FilePicker extends JFrame implements ActionListener{
 	
 	private static final long serialVersionUID = 1L;
@@ -18,6 +23,9 @@ public class FilePicker extends JFrame implements ActionListener{
 	private JFileChooser chooser;
 	private File file;
 	private int index;
+	/*
+	 * Describes user action, uploading or downloading file
+	 */
 	private Common.action cmd;
 	
 	private FilePicker()
@@ -95,7 +103,6 @@ public class FilePicker extends JFrame implements ActionListener{
 		}	
 	}
 
-	
 	private void addFile(String directory)
 	{
 		file = new File(directory);		
