@@ -3,6 +3,7 @@ package remote_client;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
@@ -18,6 +19,7 @@ import com.sun.glass.events.WindowEvent;
 public class ConnectionInterface extends JFrame implements ActionListener {
 
 	private Connection connection;
+	private Synchronizer synchronizer;
 	private JPanel mainPanel;
 	private JButton uploadButton;
 	private JButton deleteButton;
@@ -25,6 +27,7 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 	private JButton downloadButton;
 	private JList<String> list;
 	private static ConnectionInterface instance;
+	
 	public static ConnectionInterface getInstance()
 	{
 		if(instance == null)
@@ -82,9 +85,10 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 		try
 		{
 		connection = new Connection(hostName,portname);
-		list=connection.login();
-
-		}catch(UnknownHostException e)
+		synchronizer = new Synchronizer(portname);
+		list=new JList<String>(connection.login());
+		}
+		catch(UnknownHostException e)
 		{
 			JOptionPane.showMessageDialog(null,"Don't know about host " + hostName);
 			this.setVisible(false);
@@ -104,24 +108,35 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 		System.out.println("logged in");
 	}
 	
-	public final Connection getConnection()
+	public final void send(File file)
 	{
-		return connection;
+		connection.send(file);;
+	}
+	
+	public final void download(String Dir)
+	{
+		connection.download(Dir);
+	}
+	
+	public final void disconnect()
+	{
+		JOptionPane.showMessageDialog(null,"Disconnecting!");
+		connection.disconnect();
+		synchronizer.disconnect();
+		this.setVisible(false);
+	 	Menu.getInstance().setVisible(true);
 	}
 
 	public void update()
 	{
-		mainPanel.remove(list);
 		try
 		{
-			list=connection.getList();
+			String[] list=connection.getList();
+			synchronizeList(list);
 		} catch (IOException e) 
 		{
 			JOptionPane.showMessageDialog(null,"Cant get file list from host");
 		}
-		mainPanel.add(list,BorderLayout.NORTH);
-		SwingUtilities.updateComponentTreeUI(this);
-		System.out.println("connected list gotten");
 		this.setVisible(true);
 	}
 	
@@ -147,6 +162,14 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 		}
 	}
 	
+	synchronized public void synchronizeList(String[] stringList)
+	{
+		mainPanel.remove(list);
+		list = new JList<String>(stringList);
+		mainPanel.add(list,BorderLayout.NORTH);
+		SwingUtilities.updateComponentTreeUI(this);
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
@@ -167,9 +190,8 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 		}
 		else 
 		{
-			connection.disconnect();
-			this.setVisible(false);
-		 	Menu.getInstance().setVisible(true);
+			disconnect();
+			
 		}
 	}
 }

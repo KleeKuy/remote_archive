@@ -82,7 +82,7 @@ public class FilePicker extends JFrame implements ActionListener{
 				addFile(directory);		
 				JOptionPane.showMessageDialog(null,"New file - "+ directory +"to be added");
 				setVisible(false);
-				ConnectionInterface.getInstance().getConnection().send(file);
+				ConnectionInterface.getInstance().send(file);
 				ConnectionInterface.getInstance().update();
 				break;
 			case DOWNLOADING:
@@ -90,7 +90,7 @@ public class FilePicker extends JFrame implements ActionListener{
 				addFile(dir);		
 				JOptionPane.showMessageDialog(null,"Download directory - "+ dir);
 				setVisible(false);
-				ConnectionInterface.getInstance().getConnection().download(dir);
+				ConnectionInterface.getInstance().download(dir);
 				ConnectionInterface.getInstance().setVisible(true);
 				break;
 			default:

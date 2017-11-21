@@ -16,4 +16,10 @@ public class Protocol
 	
 	static final String DOWNLOAD = "download";
 	
+	static final String SYNCHRONIZE = "synchronize";
+	
+	static final String CONFIRM_SEND = "c_send";
+	
+	static final String ABORT_SEND = "a_send";
+	
 }
