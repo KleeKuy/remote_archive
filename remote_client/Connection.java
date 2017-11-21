@@ -12,7 +12,6 @@ import java.io.PrintWriter;
 import java.net.*;
 import java.util.Objects;
 
-import javax.swing.JList;
 import javax.swing.JOptionPane;
 
 
@@ -23,7 +22,6 @@ public class Connection {
 	private BufferedReader inHost;
     private	OutputStream outs;
     private InputStream ins;
-	private int index;
 
 	public Connection(final String hostName, String portname) throws UnknownHostException, IOException
 	{
@@ -91,7 +89,7 @@ public class Connection {
 		out.println(index);
 	}
 	
-	public final void download(String directory)
+	public final void download(String directory,int index)
 	{
 		out.println(Protocol.DOWNLOAD);
 		out.println(index);
@@ -115,11 +113,6 @@ public class Connection {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null,"Exception raised while receiving file!");
 		}
-	}
-	
-	public void setIndex(int index)
-	{
-		this.index=index;
 	}
 	
 	public void disconnect()

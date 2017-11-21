@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.util.ArrayList;
-
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -19,20 +17,13 @@ public class FilePicker extends JFrame implements ActionListener{
 	
 	private JFileChooser chooser;
 	private File file;
-	
-	private enum action
-	{
-		DOWNLOADING, UPLOADING
-	}
-	
-	private action cmd;
+	private int index;
+	private Common.action cmd;
 	
 	private FilePicker()
 	{
 		super("Choose archive location");
-				
-		checkPrevious();
-		
+						
 		JPanel mainPanel = new JPanel();
 		chooser = new JFileChooser();
 	    chooser.setAcceptAllFileFilterUsed(true);
@@ -47,16 +38,22 @@ public class FilePicker extends JFrame implements ActionListener{
 	
 	public void pickDir()
 	{
-		cmd = action.DOWNLOADING;
+		cmd = Common.action.DOWNLOADING;
 		chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 	}
 	
 	public void pickFile()
 	{
 		file = null;
-		cmd = action.UPLOADING;
+		cmd = Common.action.UPLOADING;
 		chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 	}
+	
+	public void setIndex(int indeks)
+	{
+		index=indeks;
+	}
+	
 	
 	public static FilePicker getInstance()
 	{
@@ -77,40 +74,27 @@ public class FilePicker extends JFrame implements ActionListener{
 			switch(cmd)
 			{
 			case UPLOADING:
-				System.out.println("approved selection!");
 				String directory = chooser.getSelectedFile().getPath();
 				addFile(directory);		
 				JOptionPane.showMessageDialog(null,"New file - "+ directory +"to be added");
 				setVisible(false);
-				ConnectionInterface.getInstance().send(file);
-				ConnectionInterface.getInstance().update();
+				ConnectionInterface.getInstance().setVisible(true);
+				Queuer.getInstance().addToQueueUpload(file);
 				break;
 			case DOWNLOADING:
 				String dir = directory = chooser.getSelectedFile().getPath();;
 				addFile(dir);		
 				JOptionPane.showMessageDialog(null,"Download directory - "+ dir);
 				setVisible(false);
-				ConnectionInterface.getInstance().download(dir);
+				Queuer.getInstance().addToQueueDownload(dir,index);
 				ConnectionInterface.getInstance().setVisible(true);
 				break;
 			default:
-				System.out.println("Something went wrong...");
 				break;
 			}
 		}	
+	}
 
-		//file = null;
-	}
-	
-	/*
-	 * Checks in config files whether there are files 
-	 * set previously in config
-	 */
-	private void checkPrevious()
-	{
-		System.out.println("to be implmented");
-		//TODO implement
-	}
 	
 	private void addFile(String directory)
 	{

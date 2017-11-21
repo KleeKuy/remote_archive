@@ -17,15 +17,13 @@ public class Synchronizer implements Runnable {
 	
 	public Synchronizer(String port)
 	{
-		System.out.println("Synchronizer");
 		portname = port;
-		thread = new Thread(this);
+		thread = new Thread();
 		thread.start();
 	}
 	
 	private void init()
 	{
-		System.out.println("init");
 		int port = Integer.parseInt(portname);
 		try 
 		{
@@ -55,8 +53,6 @@ public class Synchronizer implements Runnable {
 			} catch (IOException e)
 			{
 				e.printStackTrace();
-				thread.interrupt();
-				return;
 			}
 		thread.interrupt();
 	}
@@ -73,7 +69,6 @@ public class Synchronizer implements Runnable {
 	@Override
 	public void run() 
 	{
-		System.out.println("run");
 		init();
 		while(true)
 		{
@@ -84,7 +79,6 @@ public class Synchronizer implements Runnable {
 			{
 				ConnectionInterface.getInstance().disconnect();
 				e.printStackTrace();
-				break;
 			}
 		}
 		
