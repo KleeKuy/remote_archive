@@ -2,6 +2,10 @@ package remote_client;
 
 import java.awt.Dimension;
 
+/*
+ * Class containing common methods and variables
+ */
+
 public class Common {
 
 	public static boolean isNumeric(String str)  
@@ -17,16 +21,13 @@ public class Common {
 	  return true;  
 	}
 	
-	public static void shutdown()
-	{
-		//TODO implement, idea is that whenever
-		//program is to be closed this method will
-		//be called, and it will save stuff and
-		//close the app
-	}
-	
 	public static Dimension buttonsize()
 	{
 		return new Dimension(400,100);
+	}
+	
+	public enum action
+	{
+		DOWNLOADING, UPLOADING
 	}
 }

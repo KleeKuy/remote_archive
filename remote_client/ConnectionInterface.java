@@ -3,6 +3,7 @@ package remote_client;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
@@ -13,19 +14,26 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import com.sun.glass.events.WindowEvent;
-
+/*
+ * Interface for connection, contains connection menu
+ * which is used by user to communicate with host
+ */
 public class ConnectionInterface extends JFrame implements ActionListener {
 
+	private static final long serialVersionUID = 1L;
 	private Connection connection;
 	private JPanel mainPanel;
 	private JButton uploadButton;
 	private JButton deleteButton;
 	private JButton exitButton;
 	private JButton downloadButton;
+	/*
+	 * List of files archivized
+	 */
 	private JList<String> list;
 	private static ConnectionInterface instance;
-	public static ConnectionInterface getInstance()
+	
+	synchronized public static ConnectionInterface getInstance()
 	{
 		if(instance == null)
 			instance = new ConnectionInterface();
@@ -53,7 +61,7 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 			
 			String[] data = {};
 			list = new JList<String>(data);
-			list.setLayoutOrientation(JList.VERTICAL);
+			list.setLayoutOrientation(JList.VERTICAL_WRAP);
 
 			JPanel secondPanel = new JPanel();
 			secondPanel.add(exitButton, BorderLayout.WEST);
@@ -82,9 +90,9 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 		try
 		{
 		connection = new Connection(hostName,portname);
-		list=connection.login();
-
-		}catch(UnknownHostException e)
+		list=new JList<String>(connection.login());
+		}
+		catch(UnknownHostException e)
 		{
 			JOptionPane.showMessageDialog(null,"Don't know about host " + hostName);
 			this.setVisible(false);
@@ -98,30 +106,43 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 			Menu.getInstance().setVisible(true);
 			return;
 		}
-		
+		list.setLayoutOrientation(JList.VERTICAL);
 		mainPanel.add(list,BorderLayout.NORTH);
 		SwingUtilities.updateComponentTreeUI(this);
 		System.out.println("logged in");
 	}
 	
-	public final Connection getConnection()
+	public final void send(File file)
 	{
-		return connection;
+		connection.send(file);
+	}
+	
+	public final void download(String Dir,int index)
+	{
+		connection.download(Dir,index);
+	}
+	
+	public final void disconnect()
+	{
+		JOptionPane.showMessageDialog(null,"Disconnecting!");
+		connection.disconnect();
+		this.setVisible(false);
+	 	Menu.getInstance().setVisible(true);
 	}
 
-	public void update()
+	/*
+	 * updates list of files and refreshes the list
+	 */
+	synchronized public void update()
 	{
-		mainPanel.remove(list);
 		try
 		{
-			list=connection.getList();
+			String[] list=connection.getList();
+			synchronizeList(list);
 		} catch (IOException e) 
 		{
 			JOptionPane.showMessageDialog(null,"Cant get file list from host");
 		}
-		mainPanel.add(list,BorderLayout.NORTH);
-		SwingUtilities.updateComponentTreeUI(this);
-		System.out.println("connected list gotten");
 		this.setVisible(true);
 	}
 	
@@ -129,7 +150,13 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 	{
 		int selectedIndex = list.getSelectedIndex();
 		if(selectedIndex != -1)
-			connection.delete(selectedIndex);
+			Queuer.getInstance().addToQueueDelete(selectedIndex);
+	}
+	
+	public void delete(int index)
+	{
+		connection.delete(index);
+		update();
 	}
 	
 	private final void downloadRequest()
@@ -139,12 +166,24 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 			JOptionPane.showMessageDialog(null,"No file selected!");
 		else
 		{
-			connection.setIndex(selectedIndex);
+			FilePicker.getInstance().setIndex(selectedIndex);
 			JOptionPane.showMessageDialog(null,"Select directory to download file");
 			this.setVisible(false);
 			FilePicker.getInstance().pickDir();
 			FilePicker.getInstance().setVisible(true);
 		}
+	}
+	
+	/*
+	 * updates list of files and refreshes the list
+	 */
+	synchronized public void synchronizeList(String[] stringList)
+	{
+		mainPanel.remove(list);
+		list = new JList<String>(stringList);
+		list.setLayoutOrientation(JList.VERTICAL_WRAP);
+		mainPanel.add(list,BorderLayout.NORTH);
+		SwingUtilities.updateComponentTreeUI(this);
 	}
 	
 	@Override
@@ -159,7 +198,6 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 		else if(e.getSource()==deleteButton)
 		{
 			deleteRequest();
-			update();
 		}
 		else if(e.getSource()==downloadButton)
 		{
@@ -167,9 +205,7 @@ public class ConnectionInterface extends JFrame implements ActionListener {
 		}
 		else 
 		{
-			connection.disconnect();
-			this.setVisible(false);
-		 	Menu.getInstance().setVisible(true);
+			disconnect();
 		}
 	}
 }

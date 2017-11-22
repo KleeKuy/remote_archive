@@ -6,6 +6,9 @@ import java.awt.event.ActionListener;
 
 import javax.swing.*;
 
+/*
+ * Main menu, user selects in menu host ip and port
+ */
 public class Menu extends JFrame implements ActionListener{	
 	
 	private static final long serialVersionUID = 1L;
@@ -57,7 +60,6 @@ public class Menu extends JFrame implements ActionListener{
 		
 		logButton.addActionListener(this);
 		exitButton.addActionListener(this);
-
 	}
 	
 	public static Menu getInstance()
@@ -66,8 +68,6 @@ public class Menu extends JFrame implements ActionListener{
 			instance = new Menu();
 		return instance;
 	}
-	
-
 
 	public void actionPerformed(ActionEvent e)
 	{	
